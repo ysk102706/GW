@@ -75,3 +75,5 @@ Plugins/**/Intermediate/*
 DerivedDataCache/*
 
 Content/Assets/* 
+Content/__ExternalActors__/* 
+Content/__ExternalObjects__/* 

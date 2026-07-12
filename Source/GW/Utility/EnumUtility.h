@@ -33,4 +33,12 @@ enum class ECharacterType : uint8
 	Player, 
 	Enemy, 
 	Etc 
+}; 
+
+UENUM() 
+enum class EColliderType : uint8
+{ 
+	Box, 
+	Sphere, 
+	Capsule 
 };
