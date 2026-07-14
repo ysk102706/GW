@@ -41,4 +41,23 @@ enum class EColliderType : uint8
 	Box, 
 	Sphere, 
 	Capsule 
-};
+}; 
+
+UENUM() 
+enum class EMovementType : uint8
+{ 
+	Move, 
+	Look, 
+	Jump, 
+	Crouch, 
+	Dash 
+}; 
+
+UENUM(BlueprintType) 
+enum class EMoveState : uint8
+{ 
+	Walk, 
+	Run, 
+	Crouch, 
+	Crawl 
+}; 
