@@ -2,7 +2,10 @@
 
 
 #include "CharacterBase.h" 
+
 #include "GameFramework/CharacterMovementComponent.h" 
+
+#include "Component/CharacterStatComponent.h" 
 
 ACharacterBase::ACharacterBase()
 {
@@ -13,7 +16,9 @@ ACharacterBase::ACharacterBase()
 		FString E = StaticEnum<ECharacterPointType>()->GetNameStringByValue(i); 
 		FString N = FString::Printf(TEXT("%sPoint"), *E);
 		CharacterPoint_List.Add(CreateDefaultSubobject<USceneComponent>(*N)); 
-	}
+	} 
+
+	StatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("StatComponent")); 
 }
 
 void ACharacterBase::BeginPlay()
@@ -36,8 +41,8 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 FVector ACharacterBase::GetDirection(EDirectionType Type)
 { 
-	FVector D1 = FVector(1, 0, 0) * CheckDirection(Type, EDirectionType::Forward); 
-	FVector D2 = FVector(0, 1, 0) * CheckDirection(Type, EDirectionType::Right);
+	FVector D1 = GetActorForwardVector() * CheckDirection(Type, EDirectionType::Forward); 
+	FVector D2 = GetActorRightVector() * CheckDirection(Type, EDirectionType::Right);
 	FVector D3 = FVector(0, 0, 1) * CheckDirection(Type, EDirectionType::Up);
 	
 	return D1 + D2 + D3; 
@@ -60,5 +65,10 @@ FHitResult ACharacterBase::LineTraceByCharacter(ECharacterPointType PointType, F
 	GetWorld()->LineTraceSingleByChannel(Hit, Start, End, Channel, CQP); 
 
 	return Hit;
+}
+
+FHitResult ACharacterBase::CheckFloor()
+{
+	return LineTraceByCharacter(ECharacterPointType::Foot, FVector(0, 0, -1), 15.0f, ECollisionChannel::ECC_GameTraceChannel1); 
 }
 

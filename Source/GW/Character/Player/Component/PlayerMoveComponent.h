@@ -16,9 +16,14 @@ class GW_API UPlayerMoveComponent : public UPlayerComponentBase
 
 public:	
 	UPlayerMoveComponent();
-	virtual void InitializeComponent() override; 
+	virtual void InitializeComponent() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override; 
 	virtual void BeginPlay() override; 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	void ChangeMoveState(EMoveState State); 
+
+	void LaunchPlayer(FVector Dir, float Power, float HoldTime); 
 
 protected: 
 	virtual void InputSetup(class UEnhancedInputComponent* EIC) override;
@@ -32,7 +37,6 @@ private:
 	void OnCrouch(const FInputActionValue& Value); 
 
 	void PrintMoveState(); 
-	void ChangeMoveState(EMoveState State); 
 
 	FVector2D MoveDir; 
 	EMoveState MoveState; 
@@ -42,9 +46,18 @@ private:
 	float WalkSpeed; 
 	UPROPERTY(EditAnywhere, Category = Move)
 	float RunSpeed; 
-	UPROPERTY(EditAnywhere, Category=Move) 
+	UPROPERTY(EditAnywhere, Category = Move) 
 	float CrouchSpeed; 
 	UPROPERTY(EditAnywhere, Category = Move)
 	float CrawlSpeed; 
+	UPROPERTY(EditAnywhere, Category = Move)
+	float DashSpeed; 
 
+	FTimerHandle LaunchHoldTimerHandle; 
+
+	UPROPERTY(EditAnywhere, Category = Move)
+	float DashPower;
+	UPROPERTY(EditAnywhere, Category = Move)
+	float DashHoldTime; 
+	
 };

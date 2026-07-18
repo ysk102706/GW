@@ -18,6 +18,12 @@ void UPlayerComponentBase::InitializeComponent()
 	Player->InputSetupDelegate.AddUObject(this, &UPlayerComponentBase::InputSetup); 
 }
 
+void UPlayerComponentBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{ 
+	Super::EndPlay(EndPlayReason); 
+
+}
+
 void UPlayerComponentBase::BeginPlay()
 {
 	Super::BeginPlay();

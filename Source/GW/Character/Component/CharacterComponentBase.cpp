@@ -17,6 +17,12 @@ void UCharacterComponentBase::InitializeComponent()
 	Character = Cast<ACharacterBase>(GetOwner()); 
 }
 
+void UCharacterComponentBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{ 
+	Super::EndPlay(EndPlayReason); 
+
+}
+
 void UCharacterComponentBase::BeginPlay()
 {
 	Super::BeginPlay();

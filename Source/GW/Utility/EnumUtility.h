@@ -59,5 +59,54 @@ enum class EMoveState : uint8
 	Walk, 
 	Run, 
 	Crouch, 
-	Crawl 
+	Crawl, 
+	Dash 
 }; 
+
+UENUM(BlueprintType) 
+enum class ESkillType : uint8
+{ 
+	Dash, 
+	ManaOffset,
+	ChangeElemental, 
+	ManaControl 
+}; 
+
+UENUM(BlueprintType) 
+enum class EScrollType : uint8
+{ 
+	Scroll, 
+	Click 
+};
+
+UENUM(BlueprintType) 
+enum class EPlayerComponentType : uint8
+{ 
+	Move, 
+}; 
+
+UENUM(BlueprintType)
+enum class EElementalType : uint8
+{
+	None,
+	Fire,
+	Water,
+	Wind,
+	Soil,
+	Twilight,
+	Sheen,
+	Distortion,
+	WhiteFlame,
+	Freezing,
+	BlueFlame,
+	Thunderbolt,
+	Zero,
+	PureDarkness,
+	PureLight,
+	IncompleteDarkness,
+	IncompleteLight,
+	TwistedDistortion,
+	Ashes,
+
+	Count
+};

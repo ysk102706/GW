@@ -15,6 +15,7 @@ class GW_API UCharacterComponentBase : public UActorComponent
 public:	
 	UCharacterComponentBase(); 
 	virtual void InitializeComponent() override; 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override; 
 	virtual void BeginPlay() override; 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h" 
 
 #include "Component/PlayerMoveComponent.h" 
+#include "Component/PlayerSkillComponent.h" 
 
 AMainPlayer::AMainPlayer()
 {
@@ -19,6 +20,7 @@ AMainPlayer::AMainPlayer()
 	CameraComponent->bUsePawnControlRotation = true; 
 
 	MoveComponent = CreateDefaultSubobject<UPlayerMoveComponent>(TEXT("MoveComponent")); 
+	SkillComponent = CreateDefaultSubobject<UPlayerSkillComponent>(TEXT("SkillComponent")); 
 }
 
 void AMainPlayer::BeginPlay()
@@ -76,4 +78,3 @@ void AMainPlayer::RemoveIMC(UInputMappingContext* IMC)
 		Subsystem->RemoveMappingContext(IMC); 
 	}
 }
-

@@ -22,6 +22,10 @@ public:
 	int CheckDirection(EDirectionType Type, EDirectionType Target); 
 	
 	FHitResult LineTraceByCharacter(ECharacterPointType PointType, FVector Direction, float Length, ECollisionChannel Channel);
+	FHitResult CheckFloor(); 
+
+	UPROPERTY(EditAnywhere) 
+	class UCharacterStatComponent* StatComponent; 
 
 private: 
 	UPROPERTY(EditAnywhere) 

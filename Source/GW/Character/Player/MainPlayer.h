@@ -23,19 +23,21 @@ public:
 
 	void AddIMC(class UInputMappingContext* IMC, int Priority);
 	void RemoveIMC(class UInputMappingContext* IMC); 
-
+	
 	FInputSetupDelegate InputSetupDelegate; 
-
-private: 
-	class UEnhancedInputLocalPlayerSubsystem* GetSubsystem(); 
-
-	UPROPERTY(EditAnywhere, Category = Input) 
-	TArray<class UInputMappingContext*> IMC_List; 
 
 	UPROPERTY(EditAnywhere) 
 	class UCameraComponent* CameraComponent; 
 
 	UPROPERTY(EditAnywhere) 
 	class UPlayerMoveComponent* MoveComponent; 
+	UPROPERTY(EditAnywhere) 
+	class UPlayerSkillComponent* SkillComponent; 
+
+private: 
+	class UEnhancedInputLocalPlayerSubsystem* GetSubsystem(); 
+
+	UPROPERTY(EditAnywhere, Category = Input) 
+	TArray<class UInputMappingContext*> IMC_List; 
 
 };
