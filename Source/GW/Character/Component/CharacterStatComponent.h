@@ -7,6 +7,22 @@
 #include "../../Utility/EnumUtility.h" 
 #include "CharacterStatComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FStat
+{ 
+	GENERATED_BODY() 
+
+public: 
+	UPROPERTY(EditAnywhere) 
+	float Base = 0.0f; 
+	UPROPERTY(EditAnywhere)
+	float Add = 0.0f;
+	UPROPERTY(EditAnywhere)
+	float Mul = 1.0f;
+
+	float Get() { return (Base + Add) * Mul; } 
+
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GW_API UCharacterStatComponent : public UCharacterComponentBase 
@@ -21,9 +37,9 @@ public:
 
 	void ChangeCoreElemental(int Idx); 
 
-	float Strength; 
-	float Speed; 
-	float ManaResistance; 
+	FStat Strength; 
+	FStat Speed; 
+	FStat ManaResistance; 
 
 	EElementalType CoreElemental;
 	TArray<EElementalType> UsableElemental_List;

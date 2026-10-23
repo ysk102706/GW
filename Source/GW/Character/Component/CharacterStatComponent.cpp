@@ -7,6 +7,9 @@ UCharacterStatComponent::UCharacterStatComponent()
 { 
 	PrimaryComponentTick.bCanEverTick = true;
 
+	Strength.Base = 10; 
+	Speed.Base = 10; 
+	ManaResistance.Base = 10; 
 }
 
 void UCharacterStatComponent::InitializeComponent()

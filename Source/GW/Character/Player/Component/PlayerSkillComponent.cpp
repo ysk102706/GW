@@ -117,7 +117,7 @@ void UPlayerSkillComponent::OnManaControlStart(const FInputActionValue& Value)
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Mana Condense Start")); 
 
 	CondensedMana = 0; 
-	Player->StatComponent->Speed /= ManaCondenseMoveSpeedSlowRate; 
+	Player->StatComponent->Speed.Mul /= ManaCondenseMoveSpeedSlowRate; 
 
 	ManaCondense(); 
 }
@@ -128,7 +128,7 @@ void UPlayerSkillComponent::OnManaControlEnd(const FInputActionValue& Value)
 
 	GetWorld()->GetTimerManager().ClearTimer(ManaCondenseTimerHandle); 
 	
-	Player->StatComponent->Speed *= ManaCondenseMoveSpeedSlowRate; 
+	Player->StatComponent->Speed.Mul *= ManaCondenseMoveSpeedSlowRate; 
 
 	SkillCombinationData |= BaseValue << int(ESkillType::ManaControl);
 	
@@ -239,11 +239,11 @@ void UPlayerSkillComponent::Dash()
 
 void UPlayerSkillComponent::ManaOffset()
 { 
-	Player->StatComponent->ManaResistance += 10000;
+	Player->StatComponent->ManaResistance.Add += 10000;
 	GetWorld()->GetTimerManager().ClearTimer(ManaOffsetHoldTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(ManaOffsetHoldTimerHandle, [&]()
 		{
-			Player->StatComponent->ManaResistance -= 10000;
+			Player->StatComponent->ManaResistance.Add -= 10000;
 		}, ManaOffsetTime, false); 
 }
 
@@ -254,16 +254,16 @@ void UPlayerSkillComponent::ManaControl()
 	bActiveManaControl = true; 
 	ControllableMana = CondensedMana; 
 
-	Player->StatComponent->Strength *= FMath::Pow(ManaControlStrengthBase, ControllableMana);
-	Player->StatComponent->Speed *= FMath::Pow(ManaControlSpeedBase, ControllableMana);
-	Player->StatComponent->ManaResistance *= FMath::Pow(ManaControlManaResistanceBase, ControllableMana);
+	Player->StatComponent->Strength.Mul *= FMath::Pow(ManaControlStrengthBase, ControllableMana);
+	Player->StatComponent->Speed.Mul *= FMath::Pow(ManaControlSpeedBase, ControllableMana);
+	Player->StatComponent->ManaResistance.Mul *= FMath::Pow(ManaControlManaResistanceBase, ControllableMana);
 
 	GetWorld()->GetTimerManager().ClearTimer(ManaControlTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(ManaControlTimerHandle, [&]()
 		{
-			Player->StatComponent->Strength /= FMath::Pow(ManaControlStrengthBase, ControllableMana);
-			Player->StatComponent->Speed /= FMath::Pow(ManaControlSpeedBase, ControllableMana);
-			Player->StatComponent->ManaResistance /= FMath::Pow(ManaControlManaResistanceBase, ControllableMana);
+			Player->StatComponent->Strength.Mul /= FMath::Pow(ManaControlStrengthBase, ControllableMana);
+			Player->StatComponent->Speed.Mul /= FMath::Pow(ManaControlSpeedBase, ControllableMana);
+			Player->StatComponent->ManaResistance.Mul /= FMath::Pow(ManaControlManaResistanceBase, ControllableMana);
 
 			bActiveManaControl = false;
 		}, ManaControlHoldTime, false);
