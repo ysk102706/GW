@@ -61,17 +61,17 @@ void UPlayerMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 void UPlayerMoveComponent::InputSetup(UEnhancedInputComponent* EIC)
 { 
-	EIC->BindAction(IA_List[int(EMovementType::Move)], ETriggerEvent::Triggered, this, &UPlayerMoveComponent::OnMove); 
-	EIC->BindAction(IA_List[int(EMovementType::Move)], ETriggerEvent::Canceled, this, &UPlayerMoveComponent::OnMoveEnd); 
-	EIC->BindAction(IA_List[int(EMovementType::Move)], ETriggerEvent::Completed, this, &UPlayerMoveComponent::OnMoveEnd); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Move)], ETriggerEvent::Triggered, this, &UPlayerMoveComponent::OnMove); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Move)], ETriggerEvent::Canceled, this, &UPlayerMoveComponent::OnMoveEnd); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Move)], ETriggerEvent::Completed, this, &UPlayerMoveComponent::OnMoveEnd); 
 
-	EIC->BindAction(IA_List[int(EMovementType::Look)], ETriggerEvent::Triggered, this, &UPlayerMoveComponent::OnLook); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Look)], ETriggerEvent::Triggered, this, &UPlayerMoveComponent::OnLook); 
 
-	EIC->BindAction(IA_List[int(EMovementType::Jump)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnJump); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Jump)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnJump); 
 
-	EIC->BindAction(IA_List[int(EMovementType::Crouch)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnCrouch); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Crouch)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnCrouch); 
 
-	EIC->BindAction(IA_List[int(EMovementType::Dash)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnDash); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Dash)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnDash); 
 }
 
 void UPlayerMoveComponent::OnMove(const FInputActionValue& Value)
@@ -88,9 +88,9 @@ void UPlayerMoveComponent::OnMoveEnd(const FInputActionValue& Value)
 
 void UPlayerMoveComponent::OnLook(const FInputActionValue& Value)
 { 
-	FVector2D v = Value.Get<FVector2D>(); 
-	Player->AddControllerPitchInput(-v.Y); 
-	Player->AddControllerYawInput(v.X); 
+	FVector2D V = Value.Get<FVector2D>() * 0.35f; 
+	Player->AddControllerPitchInput(-V.Y); 
+	Player->AddControllerYawInput(V.X); 
 }
 
 void UPlayerMoveComponent::OnJump(const FInputActionValue& Value)
@@ -133,8 +133,8 @@ void UPlayerMoveComponent::OnCrouch(const FInputActionValue& Value)
 
 void UPlayerMoveComponent::PrintMoveState()
 { 
-	int v = int(MoveState); 
-	FString E = StaticEnum<EMoveState>()->GetNameStringByValue(v); 
+	int V = int(MoveState); 
+	FString E = StaticEnum<EMoveState>()->GetNameStringByValue(V); 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, *E); 
 }
 

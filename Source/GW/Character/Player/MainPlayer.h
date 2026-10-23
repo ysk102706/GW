@@ -33,11 +33,10 @@ public:
 	class UPlayerMoveComponent* MoveComponent; 
 	UPROPERTY(EditAnywhere) 
 	class UPlayerSkillComponent* SkillComponent; 
+	UPROPERTY(EditAnywhere)
+	class UPlayerWeaponComponent* WeaponComponent;
 
 private: 
 	class UEnhancedInputLocalPlayerSubsystem* GetSubsystem(); 
-
-	UPROPERTY(EditAnywhere, Category = Input) 
-	TArray<class UInputMappingContext*> IMC_List; 
-
+	
 };

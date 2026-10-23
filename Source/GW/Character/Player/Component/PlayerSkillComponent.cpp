@@ -5,12 +5,14 @@
 
 #include "../MainPlayer.h" 
 #include "Camera/CameraComponent.h" 
-#include "PlayerMovecomponent.h" 
-#include "GameFramework/CharacterMovementComponent.h" 
+#include "PlayerMoveComponent.h" 
+#include "PlayerWeaponComponent.h" 
 #include "../../Component/CharacterStatComponent.h" 
 
 #include "EnhancedInputComponent.h" 
 #include "../../../Utility/EnumUtility.h" 
+
+#include "../../../Actor/Weapon/WeaponBase.h" 
 
 UPlayerSkillComponent::UPlayerSkillComponent()
 {
@@ -29,16 +31,24 @@ void UPlayerSkillComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	
 	GetWorld()->GetTimerManager().ClearTimer(DashHoldTimerHandle); 
-
 	GetWorld()->GetTimerManager().ClearTimer(ManaOffsetHoldTimerHandle); 
-	
 	GetWorld()->GetTimerManager().ClearTimer(ManaCondenseTimerHandle); 
-}
+	GetWorld()->GetTimerManager().ClearTimer(ControllableManaTimerHandle); 
+	GetWorld()->GetTimerManager().ClearTimer(ManaControlTimerHandle); 
+	GetWorld()->GetTimerManager().ClearTimer(SkillCombinationTimerHandle); 
+} 
 
 void UPlayerSkillComponent::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay(); 
 
+	Skill_List.Add(FSkillDelegate()); 
+	Skill_List.Add(FSkillDelegate()); 
+	Skill_List.Add(FSkillDelegate()); 
+
+	Skill_List[0].BindUObject(this, &UPlayerSkillComponent::Dash); 
+	Skill_List[1].BindUObject(this, &UPlayerSkillComponent::ManaOffset); 
+	Skill_List[2].BindUObject(this, &UPlayerSkillComponent::ManaControl); 
 }
 
 void UPlayerSkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -52,19 +62,19 @@ void UPlayerSkillComponent::InputSetup(UEnhancedInputComponent* EIC)
 { 
 	Super::InputSetup(EIC); 
 
-	EIC->BindAction(IA_List[int(ESkillType::Dash)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnDashStart); 
-	EIC->BindAction(IA_List[int(ESkillType::Dash)], ETriggerEvent::Canceled, this, &UPlayerSkillComponent::OnDashEnd); 
-	EIC->BindAction(IA_List[int(ESkillType::Dash)], ETriggerEvent::Completed, this, &UPlayerSkillComponent::OnDashEnd); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::Dash)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnDashStart); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::Dash)], ETriggerEvent::Canceled, this, &UPlayerSkillComponent::OnDashEnd); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::Dash)], ETriggerEvent::Completed, this, &UPlayerSkillComponent::OnDashEnd); 
 
-	EIC->BindAction(IA_List[int(ESkillType::ManaOffset)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnManaOffset); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::ManaOffset)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnManaOffset); 
 	
-	EIC->BindAction(IA_List[int(ESkillType::ChangeElemental)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnChangeElemental); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::ManaControl)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnManaControlStart); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::ManaControl)], ETriggerEvent::Canceled, this, &UPlayerSkillComponent::OnManaControlEnd); 
+	EIC->BindAction(BasicIA_List[int(ESkillType::ManaControl)], ETriggerEvent::Completed, this, &UPlayerSkillComponent::OnManaControlEnd); 
+
+	EIC->BindAction(BasicIA_List[int(ESkillType::ChangeElemental)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnChangeElemental); 
 	EIC->BindAction(IA_SelectElemental[int(EScrollType::Scroll)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnSelectCoreElemental_Scroll); 
 	EIC->BindAction(IA_SelectElemental[int(EScrollType::Click)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnSelectCoreElemental);
-
-	EIC->BindAction(IA_List[int(ESkillType::ManaControl)], ETriggerEvent::Started, this, &UPlayerSkillComponent::OnManaControlStart); 
-	EIC->BindAction(IA_List[int(ESkillType::ManaControl)], ETriggerEvent::Canceled, this, &UPlayerSkillComponent::OnManaControlEnd); 
-	EIC->BindAction(IA_List[int(ESkillType::ManaControl)], ETriggerEvent::Completed, this, &UPlayerSkillComponent::OnManaControlEnd); 
 }
 
 void UPlayerSkillComponent::OnDashStart(const FInputActionValue& Value)
@@ -82,19 +92,8 @@ void UPlayerSkillComponent::OnDashEnd(const FInputActionValue& Value)
 
 	bDashControl = false; 
 
-	FVector Dir = Player->CameraComponent->GetForwardVector(); 
-	auto Hit = Player->CheckFloor(); 
-	if (Hit.bBlockingHit)
-	{ 
-		float Angle = FMath::RadiansToDegrees(FMath::Acos(Dir.Dot(Hit.ImpactNormal))); 
-		if (Angle > 87.5f)
-		{ 
-			Dir = Player->CameraComponent->GetRightVector().Cross(Hit.ImpactNormal).GetSafeNormal(); 
-			Dir += FVector(0, 0, 0.075f);
-		} 
-	} 
-
-	Player->MoveComponent->LaunchPlayer(Dir, DashPower * (DashPowerPercent * 0.5f + 0.5f), DashHoldTime); 
+	SkillCombinationData |= BaseValue << int(ESkillType::Dash); 
+	StartSkillCombination(); 
 }
 
 void UPlayerSkillComponent::DashControl(float DeltaTime)
@@ -109,12 +108,50 @@ void UPlayerSkillComponent::OnManaOffset(const FInputActionValue& Value)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Mana Offset")); 
 
-	Player->StatComponent->ManaResistance += 10000; 
-	GetWorld()->GetTimerManager().ClearTimer(ManaOffsetHoldTimerHandle); 
-	GetWorld()->GetTimerManager().SetTimer(ManaOffsetHoldTimerHandle, [&]()
+	SkillCombinationData |= BaseValue << int(ESkillType::ManaOffset);
+	StartSkillCombination(); 
+}
+
+void UPlayerSkillComponent::OnManaControlStart(const FInputActionValue& Value)
+{ 
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Mana Condense Start")); 
+
+	CondensedMana = 0; 
+	Player->StatComponent->Speed /= ManaCondenseMoveSpeedSlowRate; 
+
+	ManaCondense(); 
+}
+
+void UPlayerSkillComponent::OnManaControlEnd(const FInputActionValue& Value) 
+{ 
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Mana Condense End")); 
+
+	GetWorld()->GetTimerManager().ClearTimer(ManaCondenseTimerHandle); 
+	
+	Player->StatComponent->Speed *= ManaCondenseMoveSpeedSlowRate; 
+
+	SkillCombinationData |= BaseValue << int(ESkillType::ManaControl);
+	
+	GetWorld()->GetTimerManager().ClearTimer(ControllableManaTimerHandle); 
+	GetWorld()->GetTimerManager().SetTimer(ControllableManaTimerHandle, [&]()
 		{ 
-			Player->StatComponent->ManaResistance -= 10000; 
-		}, ManaOffsetTime, false); 
+			SkillCombinationData &= ~(BaseValue << int(ESkillType::ManaControl)); 
+
+			ManaControl(); 
+		}, ControllableManaHoldTime, false); 
+}
+
+void UPlayerSkillComponent::ManaCondense()
+{
+	if (CondensedMana > 9) return; 
+
+	GetWorld()->GetTimerManager().SetTimer(ManaCondenseTimerHandle, [&]()
+		{
+			CondensedMana++; 
+			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Condensed Mana %d"), CondensedMana)); 
+
+			ManaCondense(); 
+		}, FMath::Pow(ManaCondenseUnitTime, CondensedMana) * 0.25f, false);
 }
 
 void UPlayerSkillComponent::OnChangeElemental(const FInputActionValue& Value)
@@ -152,53 +189,82 @@ void UPlayerSkillComponent::OnSelectCoreElemental(const FInputActionValue& Value
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Current Elemental End")); 
 }
 
-void UPlayerSkillComponent::OnManaControlStart(const FInputActionValue& Value)
+void UPlayerSkillComponent::ActiveWeaponBasicSkill(int Value)
 { 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Mana Condense Start")); 
-
-	CondensedMana = 0; 
-	Player->StatComponent->Speed /= ManaCondenseMoveSpeedSlowRate; 
-
-	ManaCondense(); 
+	SkillCombinationData |= Value; 
+	StartSkillCombination(); 
 }
 
-void UPlayerSkillComponent::OnManaControlEnd(const FInputActionValue& Value) 
+void UPlayerSkillComponent::StartSkillCombination()
 { 
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Mana Condense End")); 
+	if (bActiveSkillCombination) return; 
 
-	GetWorld()->GetTimerManager().ClearTimer(ManaCondenseTimerHandle); 
+	bActiveSkillCombination = true; 
+	GetWorld()->GetTimerManager().SetTimer(SkillCombinationTimerHandle, this, &UPlayerSkillComponent::ExecuteSkill, SkillCombinationTime, false); 
+} 
 
-	ControllableMana = CondensedMana; 
-	Player->StatComponent->Speed *= ManaCondenseMoveSpeedSlowRate; 
+void UPlayerSkillComponent::ExecuteSkill()
+{ 
+	Player->WeaponComponent->GetWeapon()->TryCombinationSkill(CondensedMana, SkillCombinationData); 
 
-	if (bActiveManaControl) return; 
+	bActiveSkillCombination = false; 
+
+	for (int i = 0; i < int(ESkillType::ManaOffset); i++)
+	{ 
+		if ((SkillCombinationData & (BaseValue << i)) == (BaseValue << i))
+		{ 
+			Skill_List[i].Execute(); 
+		}
+	} 
+
+	SkillCombinationData &= BaseValue << int(ESkillType::ManaControl); 
+}
+
+void UPlayerSkillComponent::Dash()
+{ 
+	FVector Dir = Player->CameraComponent->GetForwardVector();
+	auto Hit = Player->CheckFloor();
+	if (Hit.bBlockingHit)
+	{
+		float Angle = FMath::RadiansToDegrees(FMath::Acos(Dir.Dot(Hit.ImpactNormal)));
+		if (Angle > 87.5f)
+		{
+			Dir = Player->CameraComponent->GetRightVector().Cross(Hit.ImpactNormal).GetSafeNormal();
+			Dir += FVector(0, 0, 0.075f);
+		}
+	}
+
+	Player->MoveComponent->LaunchPlayer(Dir, DashPower * (DashPowerPercent * 0.5f + 0.5f), DashHoldTime); 
+}
+
+void UPlayerSkillComponent::ManaOffset()
+{ 
+	Player->StatComponent->ManaResistance += 10000;
+	GetWorld()->GetTimerManager().ClearTimer(ManaOffsetHoldTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(ManaOffsetHoldTimerHandle, [&]()
+		{
+			Player->StatComponent->ManaResistance -= 10000;
+		}, ManaOffsetTime, false); 
+}
+
+void UPlayerSkillComponent::ManaControl()
+{ 
+	if (bActiveManaControl) return;
 
 	bActiveManaControl = true; 
-	
+	ControllableMana = CondensedMana; 
+
 	Player->StatComponent->Strength *= FMath::Pow(ManaControlStrengthBase, ControllableMana);
 	Player->StatComponent->Speed *= FMath::Pow(ManaControlSpeedBase, ControllableMana);
 	Player->StatComponent->ManaResistance *= FMath::Pow(ManaControlManaResistanceBase, ControllableMana);
 
-	GetWorld()->GetTimerManager().ClearTimer(ManaControlTimerHandle); 
+	GetWorld()->GetTimerManager().ClearTimer(ManaControlTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(ManaControlTimerHandle, [&]()
-		{ 
+		{
 			Player->StatComponent->Strength /= FMath::Pow(ManaControlStrengthBase, ControllableMana);
 			Player->StatComponent->Speed /= FMath::Pow(ManaControlSpeedBase, ControllableMana);
 			Player->StatComponent->ManaResistance /= FMath::Pow(ManaControlManaResistanceBase, ControllableMana);
 
-			bActiveManaControl = false; 
+			bActiveManaControl = false;
 		}, ManaControlHoldTime, false);
-}
-
-void UPlayerSkillComponent::ManaCondense()
-{
-	if (CondensedMana > 9) return; 
-
-	GetWorld()->GetTimerManager().SetTimer(ManaCondenseTimerHandle, [&]()
-		{
-			CondensedMana++; 
-			GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Condensed Mana %d"), CondensedMana)); 
-
-			ManaCondense(); 
-		}, FMath::Pow(ManaCondenseUnitTime, CondensedMana) * 0.25f, false);
 }

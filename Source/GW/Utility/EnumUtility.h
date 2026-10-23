@@ -68,8 +68,10 @@ enum class ESkillType : uint8
 { 
 	Dash, 
 	ManaOffset,
+	ManaControl, 
 	ChangeElemental, 
-	ManaControl 
+
+	Count 
 }; 
 
 UENUM(BlueprintType) 
@@ -109,4 +111,19 @@ enum class EElementalType : uint8
 	Ashes,
 
 	Count
-};
+}; 
+
+UENUM(BlueprintType) 
+enum class EWeaponType : uint8
+{ 
+	Sword, 
+	ManaCore 
+}; 
+
+UENUM(BlueprintType)
+enum class EWeaponActionType : uint8
+{ 
+	BasicSkill, 
+	Change, 
+	SwapHands 
+}; 

@@ -28,6 +28,7 @@ void UPlayerComponentBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (BasicIMC) Player->AddIMC(BasicIMC, 0); 
 }
 
 void UPlayerComponentBase::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

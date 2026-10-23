@@ -7,6 +7,7 @@
 #include "InputAction.h" 
 #include "PlayerSkillComponent.generated.h"
 
+DECLARE_DELEGATE(FSkillDelegate)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GW_API UPlayerSkillComponent : public UPlayerComponentBase
@@ -20,6 +21,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void ActiveWeaponBasicSkill(int Value); 
+
 protected:
 	virtual void InputSetup(class UEnhancedInputComponent* EIC) override;
 
@@ -30,13 +33,20 @@ private:
 	
 	void OnManaOffset(const FInputActionValue& Value); 
 
+	void OnManaControlStart(const FInputActionValue& Value); 
+	void OnManaControlEnd(const FInputActionValue& Value); 
+	void ManaCondense(); 
+
 	void OnChangeElemental(const FInputActionValue& Value); 
 	void OnSelectCoreElemental_Scroll(const FInputActionValue& Value); 
 	void OnSelectCoreElemental(const FInputActionValue& Value); 
 
-	void OnManaControlStart(const FInputActionValue& Value); 
-	void OnManaControlEnd(const FInputActionValue& Value); 
-	void ManaCondense(); 
+	void StartSkillCombination(); 
+	void ExecuteSkill(); 
+
+	void Dash(); 
+	void ManaOffset(); 
+	void ManaControl(); 
 
 	bool bDashControl; 
 	float DashControlTime; 
@@ -53,14 +63,6 @@ private:
 	UPROPERTY(EditAnywhere) 
 	float ManaOffsetTime; 
 	FTimerHandle ManaOffsetHoldTimerHandle; 
-
-	UPROPERTY(EditAnywhere)
-	class UInputMappingContext* IMC_SelectElemental; 
-	UPROPERTY(EditAnywhere)
-	TArray<class UInputAction*> IA_SelectElemental;
-	
-	bool bActiveSelectElemental; 
-	int CurrentCoreElemental_Idx; 
 	
 	int CondensedMana; 
 	UPROPERTY(EditAnywhere) 
@@ -69,8 +71,12 @@ private:
 	float ManaCondenseMoveSpeedSlowRate; 
 	FTimerHandle ManaCondenseTimerHandle; 
 	
-	bool bActiveManaControl; 
 	int ControllableMana; 
+	UPROPERTY(EditAnywhere)
+	float ControllableManaHoldTime;
+	FTimerHandle ControllableManaTimerHandle;
+
+	bool bActiveManaControl; 
 	UPROPERTY(EditAnywhere) 
 	float ManaControlStrengthBase; 
 	UPROPERTY(EditAnywhere) 
@@ -80,5 +86,24 @@ private:
 	UPROPERTY(EditAnywhere) 
 	float ManaControlHoldTime; 
 	FTimerHandle ManaControlTimerHandle; 
+	
+
+	UPROPERTY(EditAnywhere)
+	class UInputMappingContext* IMC_SelectElemental; 
+	UPROPERTY(EditAnywhere)
+	TArray<class UInputAction*> IA_SelectElemental;
+	
+	bool bActiveSelectElemental; 
+	int CurrentCoreElemental_Idx; 
+
+	int BaseValue = 0b001000; 
+	int SkillCombinationData; 
+
+	bool bActiveSkillCombination; 
+	UPROPERTY(EditAnywhere)
+	float SkillCombinationTime;
+	FTimerHandle SkillCombinationTimerHandle; 
+
+	TArray<FSkillDelegate> Skill_List; 
 
 };

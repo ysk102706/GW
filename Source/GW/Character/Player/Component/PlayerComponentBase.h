@@ -25,8 +25,10 @@ protected:
 
 	UPROPERTY() 
 	class AMainPlayer* Player; 
-
+	
 	UPROPERTY(EditAnywhere) 
-	TArray<class UInputAction*> IA_List; 
+	class UInputMappingContext* BasicIMC; 
+	UPROPERTY(EditAnywhere) 
+	TArray<class UInputAction*> BasicIA_List; 
 
 };

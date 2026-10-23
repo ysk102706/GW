@@ -10,6 +10,7 @@
 
 #include "Component/PlayerMoveComponent.h" 
 #include "Component/PlayerSkillComponent.h" 
+#include "Component/PlayerWeaponComponent.h"  
 
 AMainPlayer::AMainPlayer()
 {
@@ -21,16 +22,13 @@ AMainPlayer::AMainPlayer()
 
 	MoveComponent = CreateDefaultSubobject<UPlayerMoveComponent>(TEXT("MoveComponent")); 
 	SkillComponent = CreateDefaultSubobject<UPlayerSkillComponent>(TEXT("SkillComponent")); 
+	WeaponComponent = CreateDefaultSubobject<UPlayerWeaponComponent>(TEXT("WeaponComponent"));
 }
 
 void AMainPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	for (auto IMC : IMC_List)
-	{ 
-		AddIMC(IMC, 0); 
-	}
 } 
 
 void AMainPlayer::Tick(float DeltaTime)
