@@ -49,6 +49,7 @@ enum class EMovementType : uint8
 	Move, 
 	Look, 
 	Jump, 
+	Run, 
 	Crouch, 
 	Dash 
 }; 
@@ -122,8 +123,9 @@ enum class EWeaponType : uint8
 
 UENUM(BlueprintType)
 enum class EWeaponActionType : uint8
-{ 
-	BasicSkill, 
+{
+	BasicSkill,
+	AttackDirection, 
 	Change, 
 	SwapHands 
 }; 

@@ -24,6 +24,18 @@ void UPlayerSkillComponent::InitializeComponent()
 { 
 	Super::InitializeComponent(); 
 
+	DashControlMaxTime = 0.5f; 
+	DashPower = 5000.0f; 
+	DashHoldTime = 0.25f; 
+	ManaOffsetTime = 0.15f; 
+	ManaCondenseUnitTime = 1.15f; 
+	ManaCondenseMoveSpeedSlowRate = 2.5f; 
+	ControllableManaHoldTime = 5.0f; 
+	ManaControlStrengthBase = 1.18f; 
+	ManaControlSpeedBase = 1.1f; 
+	ManaControlManaResistanceBase = 1.13f; 
+	ManaControlHoldTime = 15.0f; 
+	SkillCombinationTime = 0.15f; 
 }
 
 void UPlayerSkillComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

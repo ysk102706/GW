@@ -1,7 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "WeaponBase.h"
+#include "WeaponBase.h" 
+
+#include "../../Character/Player/MainPlayer.h" 
+#include "../../Character/Player/Animation/AI_Player.h" 
 
 AWeaponBase::AWeaponBase()
 {
@@ -62,7 +65,13 @@ void AWeaponBase::TryCombinationSkill(int& Mana, int& Combination)
 		{
 			BasicSkill_List[i].Execute(); 
 			
+			
 			Combination &= 0b111000; 
+
+			if (auto AI = Player->GetAnimInstance<UAI_Player>())
+			{ 
+				AI->SetAttackDirection(AttackDirection); 
+			}
 			
 			break; 
 		} 

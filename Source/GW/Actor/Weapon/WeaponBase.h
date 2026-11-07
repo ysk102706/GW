@@ -33,8 +33,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void TryCombinationSkill(int& Mana, int& Combination); 
+	void SetPlayer(class AMainPlayer* _Player) { Player = _Player; } 
+	void SetMouseDirection(FVector2D Value) { AttackDirection = Value; } 
 
+	void TryCombinationSkill(int& Mana, int& Combination); 
+	
 protected: 
 	virtual void Basic_1() { GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Basic 1")); }
 	virtual void Basic_2() { GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Basic 2")); }
@@ -47,10 +50,15 @@ protected:
 	virtual void Combination_5() { GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Combination 5")); } 
 	virtual void Combination_6() { GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("Combination 6")); } 
 	
+	UPROPERTY()
+	class AMainPlayer* Player; 
+
 private: 
 	TMap<int, FWeaponSkillDelegate> BasicSkill_List;
 
 	UPROPERTY(EditAnywhere) 
 	TArray<FCombinationSkillData> CombinationSkillData_List; 
+
+	FVector2D AttackDirection; 
 
 };

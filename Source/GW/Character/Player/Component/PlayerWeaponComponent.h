@@ -19,13 +19,15 @@ public:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	class AWeaponBase* GetWeapon() { return CurrentWeapon; }
+	class AWeaponBase* GetWeapon() { return CurrentWeapon; } 
 
 protected:
 	virtual void InputSetup(class UEnhancedInputComponent* EIC) override;
 
 private: 
-	void OnWeaponBasicSkill(const FInputActionValue& Value);
+	void OnWeaponBasicSkillStart(const FInputActionValue& Value); 
+	void OnWeaponAttackDirection(const FInputActionValue& Value); 
+	void OnWeaponBasicSkillEnd(const FInputActionValue& Value); 
 	void OnChangeWeapon(const FInputActionValue& Value); 
 
 	UPROPERTY(EditAnywhere) 
@@ -35,5 +37,7 @@ private:
 
 	UPROPERTY() 
 	class AWeaponBase* CurrentWeapon; 
+
+	FVector2D AttackDirection; 
 
 };

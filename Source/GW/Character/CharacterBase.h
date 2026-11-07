@@ -24,6 +24,12 @@ public:
 	FHitResult LineTraceByCharacter(ECharacterPointType PointType, FVector Direction, float Length, ECollisionChannel Channel);
 	FHitResult CheckFloor(); 
 
+	template<typename T> 
+	T* GetAnimInstance()
+	{ 
+		return Cast<T>(GetMesh()->GetAnimInstance()); 
+	}
+
 	UPROPERTY(EditAnywhere) 
 	class UCharacterStatComponent* StatComponent; 
 

@@ -29,7 +29,10 @@ void UPlayerWeaponComponent::BeginPlay()
 
 	for (int i = 0; i < WeaponClass_List.Num(); i++)
 	{ 
-		WeaponObject_List.Add(GetWorld()->SpawnActor<AWeaponBase>(WeaponClass_List[i]));
+		auto Weapon = GetWorld()->SpawnActor<AWeaponBase>(WeaponClass_List[i]); 
+		Weapon->SetPlayer(Player); 
+
+		WeaponObject_List.Add(Weapon); 
 	} 
 
 	CurrentWeapon = WeaponObject_List[0]; 
@@ -45,15 +48,33 @@ void UPlayerWeaponComponent::InputSetup(UEnhancedInputComponent* EIC)
 { 
 	Super::InputSetup(EIC);
 
-	EIC->BindAction(BasicIA_List[int(EWeaponActionType::BasicSkill)], ETriggerEvent::Started, this, &UPlayerWeaponComponent::OnWeaponBasicSkill);
+	EIC->BindAction(BasicIA_List[int(EWeaponActionType::BasicSkill)], ETriggerEvent::Started, this, &UPlayerWeaponComponent::OnWeaponBasicSkillStart);
+	EIC->BindAction(BasicIA_List[int(EWeaponActionType::BasicSkill)], ETriggerEvent::Canceled, this, &UPlayerWeaponComponent::OnWeaponBasicSkillEnd);
+	EIC->BindAction(BasicIA_List[int(EWeaponActionType::BasicSkill)], ETriggerEvent::Completed, this, &UPlayerWeaponComponent::OnWeaponBasicSkillEnd);
+	EIC->BindAction(BasicIA_List[int(EWeaponActionType::AttackDirection)], ETriggerEvent::Triggered, this, &UPlayerWeaponComponent::OnWeaponAttackDirection);
 	EIC->BindAction(BasicIA_List[int(EWeaponActionType::Change)], ETriggerEvent::Started, this, &UPlayerWeaponComponent::OnChangeWeapon); 
 }
 
-void UPlayerWeaponComponent::OnWeaponBasicSkill(const FInputActionValue& Value)
+void UPlayerWeaponComponent::OnWeaponBasicSkillStart(const FInputActionValue& Value)
 { 
 	float V = Value.Get<float>(); 
-	
 	Player->SkillComponent->ActiveWeaponBasicSkill(1 << int(V)); 
+
+	AttackDirection = FVector2D(0); 
+}
+
+void UPlayerWeaponComponent::OnWeaponAttackDirection(const FInputActionValue& Value)
+{ 
+	FVector2D V = Value.Get<FVector2D>(); 
+	AttackDirection += V; 
+}
+
+void UPlayerWeaponComponent::OnWeaponBasicSkillEnd(const FInputActionValue& Value)
+{ 
+	AttackDirection.Normalize(); 
+	CurrentWeapon->SetMouseDirection(AttackDirection); 
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f %f"), AttackDirection.X, AttackDirection.Y));
 }
 
 void UPlayerWeaponComponent::OnChangeWeapon(const FInputActionValue& Value)

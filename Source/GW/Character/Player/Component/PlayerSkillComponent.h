@@ -87,7 +87,6 @@ private:
 	float ManaControlHoldTime; 
 	FTimerHandle ManaControlTimerHandle; 
 	
-
 	UPROPERTY(EditAnywhere)
 	class UInputMappingContext* IMC_SelectElemental; 
 	UPROPERTY(EditAnywhere)

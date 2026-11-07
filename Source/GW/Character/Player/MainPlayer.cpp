@@ -17,7 +17,7 @@ AMainPlayer::AMainPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent")); 
-	CameraComponent->SetupAttachment(GetMesh()); 
+	CameraComponent->SetupAttachment(GetMesh(), TEXT("Camera_Socket"));
 	CameraComponent->bUsePawnControlRotation = true; 
 
 	MoveComponent = CreateDefaultSubobject<UPlayerMoveComponent>(TEXT("MoveComponent")); 

@@ -33,8 +33,9 @@ private:
 	void OnMoveEnd(const FInputActionValue& Value); 
 	void OnLook(const FInputActionValue& Value); 
 	void OnJump(const FInputActionValue& Value); 
-	void OnDash(const FInputActionValue& Value); 
+	void OnRun(const FInputActionValue& Value); 
 	void OnCrouch(const FInputActionValue& Value); 
+	void OnDash(const FInputActionValue& Value); 
 
 	void PrintMoveState(); 
 
