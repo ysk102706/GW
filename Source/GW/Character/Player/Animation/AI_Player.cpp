@@ -19,7 +19,7 @@ void UAI_Player::NativeUpdateAnimation(float DeltaSeconds)
 	if (!Player->IsValidLowLevelFast()) return; 
 
 	auto MovementComponent = Player->GetMovementComponent(); 
-	FVector Velocity = MovementComponent->Velocity;
+	Velocity = MovementComponent->Velocity;
 	Speed = Velocity.Size2D(); 
 
 	FRotator Rot = Player->GetActorRotation();

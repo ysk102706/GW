@@ -5,6 +5,7 @@
 
 #include "../MainPlayer.h" 
 #include "GameFramework/CharacterMovementComponent.h" 
+#include "Camera/CameraComponent.h" 
 
 #include "EnhancedInputComponent.h" 
 #include "../../../Utility/EnumUtility.h" 
@@ -70,14 +71,14 @@ void UPlayerMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 void UPlayerMoveComponent::InputSetup(UEnhancedInputComponent* EIC)
 { 
 	EIC->BindAction(BasicIA_List[int(EMovementType::Move)], ETriggerEvent::Triggered, this, &UPlayerMoveComponent::OnMove); 
-	EIC->BindAction(BasicIA_List[int(EMovementType::Move)], ETriggerEvent::Canceled, this, &UPlayerMoveComponent::OnMoveEnd); 
 	EIC->BindAction(BasicIA_List[int(EMovementType::Move)], ETriggerEvent::Completed, this, &UPlayerMoveComponent::OnMoveEnd); 
 
 	EIC->BindAction(BasicIA_List[int(EMovementType::Look)], ETriggerEvent::Triggered, this, &UPlayerMoveComponent::OnLook); 
 
 	EIC->BindAction(BasicIA_List[int(EMovementType::Jump)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnJump); 
 
-	EIC->BindAction(BasicIA_List[int(EMovementType::Run)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnRun); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Run)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnRunStart); 
+	EIC->BindAction(BasicIA_List[int(EMovementType::Run)], ETriggerEvent::Completed, this, &UPlayerMoveComponent::OnRunEnd); 
 	
 	EIC->BindAction(BasicIA_List[int(EMovementType::Crouch)], ETriggerEvent::Started, this, &UPlayerMoveComponent::OnCrouch); 
 
@@ -103,29 +104,28 @@ void UPlayerMoveComponent::OnLook(const FInputActionValue& Value)
 	FVector2D V = Value.Get<FVector2D>() * 0.35f; 
 	Player->AddControllerPitchInput(-V.Y); 
 	Player->AddControllerYawInput(V.X); 
+
+	auto Camera = Player->CameraComponent; 
+	FRotator Rot = Camera->GetRelativeRotation(); 
+	Rot.Pitch = FMath::Clamp(Rot.Pitch + V.Y, -75.0f, 85.0f); 
+	Rot.Yaw = 0.0f; 
+
+	Camera->SetRelativeRotation(Rot); 
 }
 
 void UPlayerMoveComponent::OnJump(const FInputActionValue& Value)
 { 
 	Player->Jump(); 
-
-	ChangeMoveState(EMoveState::Walk); 
-	PrintMoveState(); 
 }
 
-void UPlayerMoveComponent::OnRun(const FInputActionValue& Value)
+void UPlayerMoveComponent::OnRunStart(const FInputActionValue& Value)
 { 
-	switch(MoveState)
-	{ 
-	case EMoveState::Walk: 
-	case EMoveState::Crouch: 
-	case EMoveState::Crawl: 
-		ChangeMoveState(EMoveState::Run); 
-		break; 
-	case EMoveState::Run: 
-		ChangeMoveState(EMoveState::Walk); 
-		break; 
-	}
+	ChangeMoveState(EMoveState::Run); 
+}
+
+void UPlayerMoveComponent::OnRunEnd(const FInputActionValue& Value)
+{
+	ChangeMoveState(EMoveState::Walk); 
 }
 
 void UPlayerMoveComponent::OnCrouch(const FInputActionValue& Value)

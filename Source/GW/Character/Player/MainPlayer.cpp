@@ -18,7 +18,7 @@ AMainPlayer::AMainPlayer()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent")); 
 	CameraComponent->SetupAttachment(GetMesh(), TEXT("Camera_Socket"));
-	CameraComponent->bUsePawnControlRotation = true; 
+	CameraComponent->bUsePawnControlRotation = false; 
 
 	MoveComponent = CreateDefaultSubobject<UPlayerMoveComponent>(TEXT("MoveComponent")); 
 	SkillComponent = CreateDefaultSubobject<UPlayerSkillComponent>(TEXT("SkillComponent")); 
@@ -35,6 +35,7 @@ void AMainPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CameraComponent->SetWorldLocation(GetMesh()->GetSocketLocation(TEXT("Camera_Socket"))); 
 }
 
 void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -1,0 +1,78 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "MainPlayer.h" 
+
+#include "EnhancedInputComponent.h" 
+#include "EnhancedInputSubsystems.h" 
+
+#include "Camera/CameraComponent.h" 
+
+#include "Component/PlayerMoveComponent.h" 
+#include "Component/PlayerSkillComponent.h" 
+#include "Component/PlayerWeaponComponent.h"  
+
+AMainPlayer::AMainPlayer()
+{
+	PrimaryActorTick.bCanEverTick = true;
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent")); 
+	CameraComponent->SetupAttachment(GetMesh(), TEXT("Camera_Socket"));
+	CameraComponent->bUsePawnControlRotation = false; 
+
+	MoveComponent = CreateDefaultSubobject<UPlayerMoveComponent>(TEXT("MoveComponent")); 
+	SkillComponent = CreateDefaultSubobject<UPlayerSkillComponent>(TEXT("SkillComponent")); 
+	WeaponComponent = CreateDefaultSubobject<UPlayerWeaponComponent>(TEXT("WeaponComponent"));
+}
+
+void AMainPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+	
+} 
+
+void AMainPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
+	if (auto EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{ 
+		InputSetupDelegate.Broadcast(EIC); 
+	}
+}
+
+bool AMainPlayer::Hit_Implementation(FAttackInfo& Info)
+{
+	return false;
+}
+
+UEnhancedInputLocalPlayerSubsystem* AMainPlayer::GetSubsystem()
+{ 
+	if (auto PC = Cast<APlayerController>(GetController()))
+	{
+		return ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()); 
+	} 
+	return nullptr; 
+} 
+
+void AMainPlayer::AddIMC(UInputMappingContext* IMC, int Priority)
+{ 
+	if (auto Subsystem = GetSubsystem())
+	{ 
+		Subsystem->AddMappingContext(IMC, Priority); 
+	}
+}
+
+void AMainPlayer::RemoveIMC(UInputMappingContext* IMC)
+{ 
+	if (auto Subsystem = GetSubsystem())
+	{ 
+		Subsystem->RemoveMappingContext(IMC); 
+	}
+}
